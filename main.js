@@ -1,108 +1,144 @@
-/*1*/ function getFile() {
-    console.log({File: __filename, Dir: __dirname});
-}
-getFile();
-const { log, error } = require("console");
-//-------------------------------------------------------------
-/*2*/ const path = require("path");
-function getFileName (filePath) {
-    return path.basename (filePath)
-}
-console.log(getFileName("C:\\route Assignment\\Assignment 2\\main.js"));
-//------------------------------------------------------------------------
-/*3*/ function buildPath(fileObj) {
-    return path.format(fileObj)
-}
-console.log(buildPath({dir: "/folder" , name: "app" , ext: ".js"}));
-//--------------------------------------------------------------------------
-/*4*/ function getFileExtentions(filepath) {
-    return path.extname(filepath)
-}
-console.log(getFileExtentions("/docs/readme.md"));
-//----------------------------------------------------
-/*5*/ function parseFilePath(filePath) {
-    return {
-        Name: path.basename(filePath , path.extname (filePath)),
-        Ext: path.extname(filePath)
-    };
-}
-console.log(parseFilePath("/home/app/main.js"));
-//---------------------------------------------------------------
-/*6*/ function Absolute(filePath) {
-    return path.isAbsolute(filePath)
-}
-console.log(Absolute("/home/user/file.txt")); //true
-console.log(Absolute("file.txt"));  //false
+//   part 1 /*1*/ 
+const fs = require("fs");
+const { pipeline } = require("stream");
+const filePath = "data.txt";
+
+const stream = fs.createReadStream(filePath, {encoding: "utf-8", highWaterMark: 64 });
+stream.on("data", chunk => {
+    console.log("New chunk");
+    console.log(chunk);
+});
+
+stream.on("end", () => {
+    console.log("finshed reading file");
+    
+})
+   /*2*/
+const sourcePath = "./source.txt";
+const destPath = "./dest.txt";
+
+const readable = fs.createReadStream(sourcePath);
+const writable = fs.createWriteStream(destPath);
+readable.pipe(writable)
+writable.on("finish", () => {
+    console.log("file copied");
+})
+  /*3*/
+const zlib = require("zlib");
+const { pipe } = require("stream");
+const { error } = require("console");
+
+const input = "./data.txt";
+const output = "./data.txt.gz";
+
+const read = fs.createReadStream(input);
+const gzip = zlib.createGzip();
+const write = fs.createWriteStream(output);
+
+pipeline(
+    read,
+    gzip,
+    write,
+    (err) => {
+        if (err) {
+            console.error("pipeline failed", err);
+        }else {
+            console.log("file compressed seccessfully");
+            
+        }
+    }
+)
 //-----------------------------------------------------------------
-/*7*/ function segments(...segments) {
-    return path.join(...segments)
-}
-console.log(segments("src", "components", "app.js"));
-//----------------------------------------------------------
-/*8*/ function relative(relativepath) {
-    return path.resolve(relativepath)
-}
-console.log(relative("./main.js"));
+   /* part 3 */
+// 1 - The Node.js Event Loop is a system that allows Node.js
+//  to handle many tasks at the same time without blocking.
 //--------------------------------------------------------------
-/*9*/ function join(...path) {
-    return path.join(...path)
-}
-console.log(join("/folder" , "folder2/file.txt"));
-//--------------------------------------------------------
-/*10*/ const fs = require("fs");
-// async function deleteFile (filepath) {
-//     try{
-//         await fs.promises.unlink(filepath);
-// console.log(`the ${path.basename(filepath)} is deleted`)
+// 2 - libuv is a C library that Node.js uses to handle
+// libuv gives Node.js the ability to perform tasks without blocking
+// libuv is the engine that powers Node.js’s asynchronous behavior.
+// libuv is the engine that powers Node.js’s asynchronous behavior.
+// libuv is the engine that powers Node.js’s asynchronous behavior.
+// Without libuv, Node.js would not be non-blocking.
+//-------------------------------------------------------------------
+// 3 - Node.js handles async operations by:
 
-//     }catch (error) {
-//         console.error("Error deleting file" , error.message);
-//     }
-// }
-// deleteFile("C:\\route Assignment\\Assignment 2\\file.txt");
-//----------------------------------------------------------------
-/*11*/ function folder(folderPath) {
-    fs.mkdirSync(folderPath, {recursive: true });
-    console.log("success");
-}
-folder("./newFolder")
-//------------------------------------------------------
-/*12*/ const EventEmitter = require ("events");
-const emitter = new EventEmitter();
-emitter.on("sayHi", () => {
-    console.log("welcome event triggred");
-});
-emitter.emit("sayHi");
-//---------------------------------------------------
-/*13*/ emitter.on("login" , (username) => {
-    console.log(`user logged in: ${username}`);
-});
-emitter.emit("login" , "Badreldin")
-//------------------------------------------------------
-/*14*/ function read(filePath) {
-    const data = fs.readFileSync(filePath, "utf-8");
-    console.log(`the file content => "${data}" `);
-} 
-read("./file.txt");
-//---------------------------------------------------------------
-/*15*/ function write(filePath, content) {
-    fs.writeFile(filePath, content, "utf-8" , () => {
-    console.log(`file saved succesfully at ${filePath}`);
-    });
-}
-write("./async.txt", "Async save")
-//---------------------------------------------------------------
-/*16*/ function exist(dirPath) {
-   return fs.existsSync(dirPath) && fs.lstatSync(dirPath).isDirectory();
-}
-console.log(exist("./notes.txt"));
-//-----------------------------------------------------------------------------
-/*17*/ const os = require ("os");
-function get() {
-    return {
-       platform: os.platform(),
-       Arch: os.arch()
-    };
-}
-console.log(get());
+// Using libuv to manage system operations
 
+// Running heavy tasks in a thread pool
+
+// Using the event loop to trigger callbacks when ready
+
+// Keeping the main JS thread free so it never blocks
+//------------------------------------------------------------
+// 4 - Call Stack	Executes JavaScript code
+// Event Queue	Stores async callbacks waiting to run
+// Event Loop	Moves tasks from queue → call stack when it's free
+//---------------------------------------------------------------------
+// 5 - Thread Pool	A set of background threads,
+//  used to handle heavy or blocking tasks ,
+// without blocking the main JavaScript thread.
+// Default Size:	4 threads
+// How to Change:	By setting the environment variable: UV_THREADPOOL_SIZE
+//-------------------------------------------------------------------------------------
+// 6 - Node.js handles blocking code synchronously on
+//  the main thread, while non-blocking code
+//  runs asynchronously in the background using the event loop and thread pool.
+//---------------------------------------------------------------------------------
+  // part 2 /*1*/ 
+const http = require("http");
+
+const userFile = "./users.json";
+
+function readUsers() {
+    const data = fs.readFileSync(userFile, "utf-8");
+    return JSON.parse(data);
+}
+function writeUsers(users) {
+    fs.writeFileSync(userFile, JSON.stringify(users, null, 2), "utf-8");
+}
+
+const server = http.createServer((req,res) => {
+    if (req.method === "POST" && req.url === "/user") {
+        let body = "";
+        req.on("data", chunk => {
+            body += chunk.toString();
+        });
+        req.on("end", () => {
+            if (!body) {
+                res.writeHead(400 , 
+                    {"content-type": "application/json"});
+                    return res.end(JSON.stringify({error: "Embty body"}));
+            }
+            let newUser = null;
+            newUser =JSON.parse(body);
+
+            if (newUser.name || newUser.email){
+                res.writeHead(400,
+                     {"content-type": "application/json"});
+                     return res.end(JSON.stringify({error: "Name and email are required"}));
+            }
+            const users = readUsers();
+            const exists = users.some(u => u.email === newUser.email);
+            if (exist) {
+                res.writeHead(409,
+                     {"content-type": "application/json"});
+                     return res.end(JSON.stringify({error : "Email already exists"}));
+            }
+            newUser.id = Date.now();
+            users.push(newUser);
+            writeUsers(users);
+
+            res.writeHead(201, {"content-type": "application/json"});
+            res.end(JSON.stringify({message : "user created" , user: newUser}));
+        });
+    }
+    else {
+        res.writeHead(404, {"content-type": "application/json"});
+        res.end(JSON.stringify({error:"Not found"}));
+    }
+});
+
+server.listen(3000, () => {
+    console.log("server running");
+    
+});
